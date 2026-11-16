@@ -51,6 +51,15 @@ float normOf(const ParamDesc &d, float v) {
     }
 }
 
+// Flush denormals to zero so decaying tails never hit the slow path.
+inline void disableDenormals() {
+#if defined(__x86_64__)
+    fesetenv(FE_DFL_DISABLE_SSE_DENORMS_ENV);
+#else
+    fesetenv(FE_DFL_DISABLE_DENORMS_ENV);
+#endif
+}
+
 inline float softLimit(float x) {
     float a = std::fabs(x);
     if (a <= 0.8f) return x;
@@ -317,7 +326,7 @@ static float *findChannel(const AudioBufferList *l, int ch, int &stride) {
 static OSStatus ioProc(AudioObjectID, const AudioTimeStamp *, const AudioBufferList *inData, const AudioTimeStamp *, AudioBufferList *outData,
                        const AudioTimeStamp *, void *ctx) {
     HZEngine *e = (HZEngine *)ctx;
-    fesetenv(FE_DFL_DISABLE_DENORMS_ENV);
+    disableDenormals();
     uint64_t t0 = mach_absolute_time();
     if (!outData || outData->mNumberBuffers == 0) return noErr;
     for (UInt32 b = 0; b < outData->mNumberBuffers; b++)
@@ -524,7 +533,7 @@ float hz_detect_pitch(HZEngine *e) {
 }
 
 void hz_process(HZEngine *e, const float *in, float *outL, float *outR, int frames) {
-    fesetenv(FE_DFL_DISABLE_DENORMS_ENV);
+    disableDenormals();
     for (int done = 0; done < frames;) {
         int n = std::min(BLK, frames - done);
         e->block(in + done, outL + done, outR + done, n);

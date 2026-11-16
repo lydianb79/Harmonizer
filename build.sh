@@ -1,12 +1,21 @@
 #!/bin/bash
-# Builds build/Harmonizer.app (release). Usage: ./build.sh [run]
+# Builds build/Harmonizer.app (release) for this Mac.   Usage: ./build.sh [run]
+# Set ARCH=arm64 or ARCH=x86_64 to cross-build into build/<arch>/Harmonizer.app.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-swift build -c release --product Harmonizer
-BIN="$(swift build -c release --show-bin-path)/Harmonizer"
+ARCH="${ARCH:-}"
+if [ -n "$ARCH" ]; then
+    FLAGS=(-c release --arch "$ARCH")
+    APP="build/$ARCH/Harmonizer.app"
+else
+    FLAGS=(-c release)
+    APP=build/Harmonizer.app
+fi
 
-APP=build/Harmonizer.app
+swift build "${FLAGS[@]}" --product Harmonizer
+BIN="$(swift build "${FLAGS[@]}" --show-bin-path)/Harmonizer"
+
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN" "$APP/Contents/MacOS/Harmonizer"

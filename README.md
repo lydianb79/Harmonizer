@@ -20,6 +20,15 @@ The feature set is modelled on harmonizer-style hardware multi-effects pedals. A
 - **MIDI:** CC 1 / CC 11 → Hot Knob, CC 65 → HotSwitch, CC 64 → active/bypass, Program Change → preset.
 - **Six themes:** Midnight, Synthwave, Ember, Emerald, Graphite and Porcelain (light).
 
+## Download
+
+Each [release](https://github.com/lydianb79/Harmonizer/releases) has one zip per architecture:
+
+- `Harmonizer-<version>-macOS-arm64.zip` for Apple silicon Macs
+- `Harmonizer-<version>-macOS-x86_64.zip` for Intel Macs
+
+The app is ad-hoc signed and not notarized, so macOS blocks it on first launch. Right-click the app and choose Open, or allow it in System Settings › Privacy & Security.
+
 ## Requirements
 
 - macOS 13 or later
@@ -34,6 +43,18 @@ The feature set is modelled on harmonizer-style hardware multi-effects pedals. A
 This builds `build/Harmonizer.app` and opens it. On first launch macOS asks for microphone access, which is required for any audio input (including an audio interface).
 
 The app is ad-hoc signed, so macOS may ask for microphone permission again after each rebuild.
+
+To build for a specific architecture, or both release zips:
+
+```bash
+ARCH=x86_64 ./build.sh
+```
+
+```bash
+./release.sh
+```
+
+`ARCH` builds go to `build/<arch>/Harmonizer.app`; `release.sh` writes one zip per architecture into `build/`.
 
 ## Audio setup and latency
 
