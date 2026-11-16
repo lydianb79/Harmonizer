@@ -110,3 +110,7 @@ Runs every algorithm on a synthetic plucked-guitar signal, with default and extr
 ```bash
 swift Tools/make_icon.swift /tmp/AppIcon.iconset && iconutil -c icns /tmp/AppIcon.iconset -o Resources/AppIcon.icns
 ```
+
+## License
+
+Harmonizer is free software, released under the [GNU General Public License v3.0](LICENSE). You may use, modify and redistribute it under the terms of that licence; it comes with no warranty.
