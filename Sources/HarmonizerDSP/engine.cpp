@@ -104,7 +104,7 @@ struct HZEngine {
     std::atomic<bool> slotOn[2];
     std::atomic<bool> bypass{false}, mute{false}, parallel{false}, sync{false};
     std::atomic<float> bpm{120}, inGain{1}, outGain{1}, gateDb{-100};
-    std::atomic<int> inCh{0}, outL{0}, outR{1};
+    std::atomic<int> inCh{0}, inCh2{-1}, outL{0}, outR{1};  // inCh2 < 0: mono input
 
     // metering
     std::atomic<float> mIn{0}, mOutL{0}, mOutR{0}, cpu{0};
@@ -121,7 +121,7 @@ struct HZEngine {
     Smooth gIn, gOut, gByp, gSlot[2];
     float fade[2] = {0, 0}, gateEnv = 0, gateGain = 1;
     bool gateOpen = false;
-    float bufIn[BLK], dL[BLK], dR[BLK], pL[BLK], pR[BLK];
+    float bufIn[BLK], bufInR[BLK], dL[BLK], dR[BLK], pL[BLK], pR[BLK];
 
     // device
     AudioDeviceID dev = 0;
@@ -204,7 +204,7 @@ struct HZEngine {
     }
 
     // n <= BLK
-    void block(const float *in, float *L, float *R, int n) {
+    void block(const float *in, const float *inR, float *L, float *R, int n) {
         const auto &reg = registry();
         bool sy = sync;
         float bp = bpm;
@@ -253,19 +253,19 @@ struct HZEngine {
         float gAtk = 1.f - std::exp(-1.f / (0.001f * sr)), gRel = 1.f - std::exp(-1.f / (0.12f * sr));
         uint32_t w = scW.load(std::memory_order_relaxed);
         for (int i = 0; i < n; i++) {
-            float x = in[i] * gIn.next(gi), a = std::fabs(x);
+            float gn = gIn.next(gi), x = in[i] * gn, xr = inR[i] * gn, a = std::max(std::fabs(x), std::fabs(xr));
             if (a > pk) pk = a;
-            scIn[(w + (uint32_t)i) & (SC - 1)] = x;
+            scIn[(w + (uint32_t)i) & (SC - 1)] = 0.5f * (x + xr);  // tuner listens to the mono sum
             if (gateOn) {
                 gateEnv = a > gateEnv ? a : gateEnv * envRel;
                 if (gateEnv > thr) gateOpen = true;
                 else if (gateEnv < thr * 0.5f) gateOpen = false;
                 float tg = gateOpen ? 1.f : 0.f;
                 gateGain += (tg - gateGain) * (tg > gateGain ? gAtk : gRel);
-                x *= gateGain;
+                x *= gateGain; xr *= gateGain;
             }
-            bufIn[i] = x;
-            L[i] = x; R[i] = x;
+            bufIn[i] = x; bufInR[i] = xr;
+            L[i] = x; R[i] = xr;
         }
         if (pk > mIn.load(std::memory_order_relaxed)) mIn.store(pk, std::memory_order_relaxed);
 
@@ -296,7 +296,7 @@ struct HZEngine {
         float go = mute ? 0.f : outGain.load(), bt = byp ? 0.f : 1.f, pl = 0, pr = 0;
         for (int i = 0; i < n; i++) {
             float b = gByp.next(bt), g = gOut.next(go);
-            float l = softLimit((bufIn[i] + b * (L[i] - bufIn[i])) * g), r = softLimit((bufIn[i] + b * (R[i] - bufIn[i])) * g);
+            float l = softLimit((bufIn[i] + b * (L[i] - bufIn[i])) * g), r = softLimit((bufInR[i] + b * (R[i] - bufInR[i])) * g);
             if (!(std::fabs(l) < 100.f)) l = 0;  // NaN/inf guard
             if (!(std::fabs(r) < 100.f)) r = 0;
             L[i] = l; R[i] = r;
@@ -334,7 +334,9 @@ static OSStatus ioProc(AudioObjectID, const AudioTimeStamp *, const AudioBufferL
     const AudioBuffer &ob = outData->mBuffers[0];
     int frames = (int)(ob.mDataByteSize / (sizeof(float) * std::max<UInt32>(1, ob.mNumberChannels)));
     int si = 1, sl = 1, sr2 = 1;
-    const float *ip = findChannel(inData, e->inCh, si);
+    int si2 = 1;
+    const float *ip = findChannel(inData, e->inCh, si), *ip2 = findChannel(inData, e->inCh2, si2);
+    if (!ip2) { ip2 = ip; si2 = si; }  // mono: the one channel feeds both sides
     float *lp = findChannel(outData, e->outL, sl), *rp = findChannel(outData, e->outR, sr2);
     if (ip && inData) {
         // never read past the end of the input buffer if it is shorter than the output
@@ -348,11 +350,14 @@ static OSStatus ioProc(AudioObjectID, const AudioTimeStamp *, const AudioBufferL
             c += (int)bf.mNumberChannels;
         }
     }
-    float in[BLK], l[BLK], r[BLK];
+    float in[BLK], in2[BLK], l[BLK], r[BLK];
     for (int done = 0; done < frames;) {
         int n = std::min(BLK, frames - done);
-        for (int i = 0; i < n; i++) in[i] = ip ? ip[(done + i) * si] : 0.f;
-        e->block(in, l, r, n);
+        for (int i = 0; i < n; i++) {
+            in[i] = ip ? ip[(done + i) * si] : 0.f;
+            in2[i] = ip2 ? ip2[(done + i) * si2] : 0.f;
+        }
+        e->block(in, in2, l, r, n);
         if (lp && rp && lp != rp) {
             for (int i = 0; i < n; i++) { lp[(done + i) * sl] = l[i]; rp[(done + i) * sr2] = r[i]; }
         } else if (lp) {
@@ -402,7 +407,9 @@ void hz_stop(HZEngine *e) {
     e->dev = 0;
     e->cpu = 0;
 }
-void hz_set_io(HZEngine *e, int inChannel, int outLeft, int outRight) { e->inCh = inChannel; e->outL = outLeft; e->outR = outRight; }
+void hz_set_io(HZEngine *e, int inLeft, int inRight, int outLeft, int outRight) {
+    e->inCh = inLeft; e->inCh2 = inRight; e->outL = outLeft; e->outR = outRight;
+}
 
 int hz_algo_count(void) { return (int)registry().size(); }
 static const AlgoInfo &info(int a) { return registry()[(size_t)clampf((float)a, 0, (float)registry().size() - 1)]; }
@@ -536,7 +543,16 @@ void hz_process(HZEngine *e, const float *in, float *outL, float *outR, int fram
     disableDenormals();
     for (int done = 0; done < frames;) {
         int n = std::min(BLK, frames - done);
-        e->block(in + done, outL + done, outR + done, n);
+        e->block(in + done, in + done, outL + done, outR + done, n);
+        done += n;
+    }
+}
+
+void hz_process_stereo(HZEngine *e, const float *inL, const float *inR, float *outL, float *outR, int frames) {
+    disableDenormals();
+    for (int done = 0; done < frames;) {
+        int n = std::min(BLK, frames - done);
+        e->block(inL + done, inR + done, outL + done, outR + done, n);
         done += n;
     }
 }

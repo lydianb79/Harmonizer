@@ -197,6 +197,14 @@ final class AudioManager: ObservableObject {
         }
     }
 
+    /// Choices for the input picker: every channel as mono, then every adjacent pair as stereo.
+    var inputOptions: [(tag: Int, label: String)] {
+        let n = inputChannelCount
+        var out = (0..<n).map { (tag: $0, label: n == 1 ? "Mono" : "Mono: Input \($0 + 1)") }
+        if n >= 2 { out += (0..<(n - 1)).map { (tag: 1000 + $0, label: "Stereo: Inputs \($0 + 1) + \($0 + 2)") } }
+        return out
+    }
+
     var inputDevice: AudioDevice? { inputs.first { $0.uid == inputUID } }
     var outputDevice: AudioDevice? { outputs.first { $0.uid == outputUID } }
 
@@ -219,7 +227,9 @@ final class AudioManager: ObservableObject {
 
     private func updateOptions() {
         inputChannelCount = max(1, inputDevice?.inChannels ?? 1)
-        if inputChannel >= inputChannelCount { inputChannel = 0 }
+        // inputChannel encodes mono channel n as n, and the stereo pair n + (n+1) as 1000 + n
+        let base = inputChannel % 1000, needed = inputChannel >= 1000 ? base + 2 : base + 1
+        if needed > inputChannelCount { inputChannel = 0 }
         var range = 16...4096
         var rates: [Double] = [44100, 48000, 88200, 96000, 176400, 192000]
         for dev in [inputDevice, outputDevice].compactMap({ $0 }) {
@@ -294,7 +304,8 @@ final class AudioManager: ObservableObject {
         actualRate = HAL.sampleRate(ioDevice)
 
         hz_prepare(engine, actualRate)
-        hz_set_io(engine, Int32(inputChannel), Int32(outOffset), Int32(outOffset + (output.outChannels > 1 ? 1 : 0)))
+        let stereo = inputChannel >= 1000, inLeft = inputChannel % 1000
+        hz_set_io(engine, Int32(inLeft), Int32(stereo ? inLeft + 1 : -1), Int32(outOffset), Int32(outOffset + (output.outChannels > 1 ? 1 : 0)))
         let st = hz_start(engine, ioDevice)
         guard st == 0 else {
             destroyAggregate()
@@ -308,7 +319,7 @@ final class AudioManager: ObservableObject {
         latencyMs = Double(frames) / actualRate * 1000
         latencyDetail = "input \(inLat) + output \(outLat) + 2 × \(actualBuffer) buffer = \(frames) frames"
         isRunning = true
-        status = "\(input.name) → \(output.name)"
+        status = "\(input.name)\(stereo ? " (stereo)" : "") → \(output.name)"
     }
 
     func markDemo() { status = "Demo signal (no audio device in use)" }

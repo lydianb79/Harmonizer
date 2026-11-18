@@ -115,6 +115,21 @@ int main() {
         if (!ok) fails++;
         printf("spillover: Hall tail rms %.5f, tail-less effect %.6f %s\n", hall, dry, ok ? "ok" : "FAIL");
     }
+    // stereo input: left and right must stay separate through the dry path, and mono must feed both sides
+    {
+        hz_set_slot_on(e, 0, 0);
+        std::vector<float> zero((size_t)frames, 0.f), ol((size_t)frames), orr((size_t)frames);
+        hz_process_stereo(e, &in[0], &zero[0], &ol[0], &orr[0], frames);  // let the previous effect fade out
+        hz_process_stereo(e, &in[0], &zero[0], &ol[0], &orr[0], frames);
+        double sl = 0, srr = 0, ml = 0, mr = 0;
+        for (int i = 0; i < frames; i++) { sl += ol[(size_t)i] * ol[(size_t)i]; srr += orr[(size_t)i] * orr[(size_t)i]; }
+        hz_process(e, &in[0], &ol[0], &orr[0], frames);
+        for (int i = 0; i < frames; i++) { ml += ol[(size_t)i] * ol[(size_t)i]; mr += orr[(size_t)i] * orr[(size_t)i]; }
+        bool ok = sl > 1.0 && srr < 1e-9 && ml > 1.0 && std::fabs(ml - mr) < 1e-6 * ml;
+        if (!ok) fails++;
+        printf("stereo input: left-only in -> L %.3f R %.6f; mono in -> L %.3f R %.3f %s\n", sl, srr, ml, mr, ok ? "ok" : "FAIL");
+        hz_set_slot_on(e, 0, 1);
+    }
     printf("%d algorithms\n", n);
     printf("\nworst single-slot load: %.2f%% of realtime at 32-frame blocks\n%s\n", worst, fails ? "FAILURES" : "ALL OK");
     hz_destroy(e);

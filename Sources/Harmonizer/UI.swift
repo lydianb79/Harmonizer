@@ -486,9 +486,9 @@ struct SettingsView: View {
                     }
                 }
                 GridRow {
-                    Text("Input channel")
+                    Text("Input")
                     Picker("", selection: $audio.inputChannel) {
-                        ForEach(0..<audio.inputChannelCount, id: \.self) { Text("Input \($0 + 1)").tag($0) }
+                        ForEach(audio.inputOptions, id: \.tag) { Text($0.label).tag($0.tag) }
                     }
                 }
                 GridRow {

@@ -60,7 +60,10 @@ ARCH=x86_64 ./build.sh
 
 ## Audio setup and latency
 
-Open **Settings** (gear icon) to choose the input device, input channel, output device, sample rate and buffer size. The dialog shows the resulting round-trip latency.
+Open **Settings** (gear icon) to choose the input device, the input (mono or stereo), output device, sample rate and buffer size. The dialog shows the resulting round-trip latency.
+
+- **Mono input** (any single channel) feeds both sides, which is the usual choice for a guitar.
+- **Stereo input** (any adjacent channel pair, e.g. Inputs 1 + 2) keeps left and right separate through the dry path, bypass and the effects that process each side on its own (EQ Compressor, the tremolos, Mod Filter, Vibrato, Ring Mod, Looper). Most other algorithms sum their input to mono and produce a stereo result, so a stereo source is narrowed going into those. The tuner listens to the mono sum.
 
 - All processing is C++ running directly in the CoreAudio device callback (IOProc); nothing Swift runs on the audio thread.
 - If input and output are **different devices**, they are combined into one private, drift-compensated aggregate device. A single audio interface for both gives the lowest latency.

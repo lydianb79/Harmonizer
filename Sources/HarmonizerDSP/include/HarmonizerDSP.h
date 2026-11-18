@@ -16,7 +16,8 @@ void hz_prepare(HZEngine *e, double sampleRate);
 int hz_start(HZEngine *e, unsigned int deviceID);
 void hz_stop(HZEngine *e);
 // Flat channel indices on the IO device (across all of its streams).
-void hz_set_io(HZEngine *e, int inChannel, int outLeft, int outRight);
+// inRight < 0 selects mono input: inLeft feeds both sides.
+void hz_set_io(HZEngine *e, int inLeft, int inRight, int outLeft, int outRight);
 
 // Algorithm catalogue (static)
 int hz_algo_count(void);
@@ -51,8 +52,9 @@ float hz_get_visual(HZEngine *e, float *spectrum, float *wave, int n);
 // Tuner: fundamental of the input in Hz, 0 when nothing is detected.
 float hz_detect_pitch(HZEngine *e);
 
-// Offline processing (tests): mono in, stereo out.
+// Offline processing (tests): mono or stereo in, stereo out.
 void hz_process(HZEngine *e, const float *in, float *outL, float *outR, int frames);
+void hz_process_stereo(HZEngine *e, const float *inL, const float *inR, float *outL, float *outR, int frames);
 
 #ifdef __cplusplus
 }
