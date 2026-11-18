@@ -328,6 +328,9 @@ final class EngineModel: ObservableObject {
         var polyFlex = slot("Poly Flex", ["Heel": 0, "Toe": -12])
         polyFlex.hotMin[1] = 0
         polyFlex.hotMax[1] = 1
+        var steel = slot("Poly Flex", ["Heel": 0, "Toe": 2, "Glide": 60])
+        steel.hotMin[1] = 0
+        steel.hotMax[1] = 1
         return [
             p("Wide Detune", slot("Micro Shift"), slot("Plate", ["Mix": 18, "Decay": 1.2])),
             p("Twin Leads", slot("Diatonic", ["Interval A": 2, "Interval B": -3, "Mix": 55]), slot("Digital Delay", ["Mix": 25, "Time A": 380, "Time B": 380])),
@@ -360,6 +363,41 @@ final class EngineModel: ObservableObject {
             p("Broken Radio", slot("Glitch"), slot("Vintage Delay", ["Mix": 25])),
             p("Echo Heads", slot("Multi Head", ["Head 3": 50]), slot("Bucket Delay", ["Mix": 20], on: false)),
             p("Backwards Bloom", slot("Reverse Verb"), slot("Dyna Verb", ["Mode": 2, "Mix": 35])),
+            // --- delays
+            p("Dotted Eighth", slot("Digital Delay", ["Time A": 375, "Time B": 375, "Feedback": 35, "Mix": 30]), slot("Plate", ["Mix": 15])),
+            p("Slapback", slot("Tape Echo", ["Time": 110, "Feedback": 10, "Mix": 35]), slot("Spring", ["Mix": 20])),
+            p("Ambient Wash", slot("Ducked Delay", ["Mix": 40]), slot("Dual Verb", ["Mix": 45])),
+            p("Filter Bounce", slot("Filter Pong", ["Feedback": 60]), slot("Room", ["Mix": 12])),
+            p("Lo-Fi Memory", slot("Vintage Delay", ["Bits": 8, "Sample Rate": 6000]), slot("Tri Chorus", ["Mix": 30])),
+            p("Analog Warmth", slot("Bucket Delay", ["Mix": 35]), slot("Tri Chorus", ["Rate": 0.3, "Mix": 25])),
+            p("Dub Echoes", slot("Band Delay", ["Feedback": 70, "Time": 450]), slot("Spring", ["Mix": 25])),
+            // --- clean and modulation
+            p("Clean Sparkle", slot("EQ Compressor", ["Threshold": -26, "High": 4]), slot("Tri Chorus", ["Mix": 30])),
+            p("Jet Engine", slot("Tape Flanger", ["Feedback": 70, "Rate": 0.1]), slot("Digital Delay", ["Mix": 20])),
+            p("Studio Phase", slot("Vintage Phaser", ["Rate": 0.8]), slot("Room", ["Mix": 12])),
+            p("Underwater", slot("Vibrato", ["Depth": 55, "Rate": 3]), slot("Mod Filter", ["Frequency": 400, "Depth": 2, "Rate": 0.3])),
+            p("Helicopter", slot("Tremolo Pan", ["Shape": 2, "Rate": 9, "Depth": 100]), slot("Drive Tape", ["Mix": 25])),
+            p("Drifting Tremolo", slot("Undulator"), slot("Tremolo Verb", ["Mix": 30])),
+            p("Sample and Hold", slot("Mod Filter", ["Shape": 3, "Rate": 6, "Resonance": 7]), slot("Digital Delay", ["Mix": 20])),
+            p("Robot Bells", slot("Ring Mod", ["Frequency": 700, "LFO Depth": 20]), slot("Mangled Verb", ["Mix": 35])),
+            // --- drive
+            p("Stadium Lead", slot("Mid Drive", ["Gain": 65]), slot("Digital Delay", ["Mix": 25, "Time A": 420, "Time B": 420])),
+            p("Fuzz Octaves", slot("Pitch Fuzz"), slot("Room", ["Mix": 15])),
+            p("Split Drive", slot("Sculpt", ["Low Drive": 10, "High Drive": 75]), slot("EQ Compressor")),
+            p("Blues Breakup", slot("Crush", ["Drive": 30, "Type": 0]), slot("Studio Room", ["Mix": 20])),
+            p("Gated Eighties", slot("Aggro", ["Gain": 55]), slot("Dyna Verb", ["Mode": 1, "Mix": 50, "Decay": 1.5])),
+            // --- pitch and synth
+            p("Fifth Up", slot("Poly Shift", ["Pitch A": 7, "Balance": 0, "Mix": 40]), slot("Plate", ["Mix": 18])),
+            p("Thirds and Sixths", slot("Diatonic", ["Interval A": 2, "Interval B": 5]), slot("Plate", ["Mix": 18])),
+            p("Minor Choir", slot("Quad Voice", ["Scale": 1, "Voice 1": 2, "Voice 2": 4, "Voice 3": 7, "Voice 4": -7]), slot("Hall", ["Mix": 35])),
+            p("Laser Harp", slot("Mod Shift", ["Mod Depth": 600, "Mod Rate": 6, "Shape": 3]), slot("Digital Delay", ["Mix": 25])),
+            p("Deep Voice", slot("Formant Shift", ["Pitch": 0, "Formant": -5]), slot("Room", ["Mix": 12])),
+            p("Steel Bends", steel, slot("Spring", ["Mix": 25])),
+            p("Cathedral Organ", slot("Poly Synth", ["Wave": 2, "Mix": 80, "Cutoff": 4000]), slot("Hall", ["Mix": 40, "Decay": 5])),
+            p("Bass Synth", slot("Saw Synth", ["Octave": -1, "Sub": 80, "Cutoff": 600]), slot("EQ Compressor")),
+            // --- ambient
+            p("Ghost Swell", slot("Dyna Verb", ["Mode": 2, "Mix": 60]), slot("Reverse", ["Mix": 40])),
+            p("Deep Space", slot("Rotary", ["Speed": 0]), slot("Wormhole", ["Mix": 55])),
             p("Frozen Void", slot("Micro Shift", ["Mix": 40]), slot("Void", ["Mix": 60, "Gravity": 40, "Size": 100])),
         ]
     }

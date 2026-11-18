@@ -14,7 +14,7 @@ The feature set is modelled on harmonizer-style hardware multi-effects pedals. A
 - **Hot Knob:** right-click any knob to set its minimum and maximum, then sweep all assigned knobs with one control.
 - **HotSwitch:** right-click a knob to store an alternate value; one button flips all assigned knobs and back.
 - **Spillover:** when you change preset or algorithm, the previous effect's tail rings out (up to 8 seconds).
-- **Presets:** 32 factory presets plus your own.
+- **Presets:** 62 factory presets plus your own.
 - **Tap tempo** with tempo sync for delay times, a **tuner** (mutes output by default), a **noise gate**, and input/output gain with meters.
 - **Looper** with record, play, overdub, half/double speed and reverse (up to 60 seconds).
 - **MIDI:** CC 1 / CC 11 → Hot Knob, CC 65 → HotSwitch, CC 64 → active/bypass, Program Change → preset.
