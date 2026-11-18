@@ -311,6 +311,8 @@ final class AudioManager: ObservableObject {
         status = "\(input.name) → \(output.name)"
     }
 
+    func markDemo() { status = "Demo signal (no audio device in use)" }
+
     func stop() {
         hz_stop(engine)
         destroyAggregate()

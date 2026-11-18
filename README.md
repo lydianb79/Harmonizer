@@ -1,5 +1,7 @@
 # Harmonizer
 
+![Harmonizer running the Glass Cathedral preset](docs/screenshot.png)
+
 A native macOS multi-effects processor for guitar, built for low latency. Two effect slots, 68 algorithms, a Metal-rendered display, and direct CoreAudio I/O with selectable input, output and buffer size.
 
 The feature set is modelled on harmonizer-style hardware multi-effects pedals. All algorithms are original implementations with their own names; this project is not affiliated with or endorsed by any pedal manufacturer and contains none of their code or presets.
@@ -14,7 +16,7 @@ The feature set is modelled on harmonizer-style hardware multi-effects pedals. A
 - **Hot Knob:** right-click any knob to set its minimum and maximum, then sweep all assigned knobs with one control.
 - **HotSwitch:** right-click a knob to store an alternate value; one button flips all assigned knobs and back.
 - **Spillover:** when you change preset or algorithm, the previous effect's tail rings out (up to 8 seconds).
-- **Presets:** 62 factory presets plus your own.
+- **Presets:** 100 factory presets plus your own.
 - **Tap tempo** with tempo sync for delay times, a **tuner** (mutes output by default), a **noise gate**, and input/output gain with meters.
 - **Looper** with record, play, overdub, half/double speed and reverse (up to 60 seconds).
 - **MIDI:** CC 1 / CC 11 → Hot Knob, CC 65 → HotSwitch, CC 64 → active/bypass, Program Change → preset.
@@ -125,6 +127,16 @@ swift build -c release --product hzbench && "$(swift build -c release --show-bin
 ```
 
 Runs every algorithm on a synthetic plucked-guitar signal, with default and extreme parameter values, and checks pitch accuracy and spillover. It exits non-zero on any failure.
+
+## Demo mode
+
+To see the interface moving without opening any audio device, start the app with a synthetic guitar signal and a preset of your choice. Nothing is played through the speakers and the microphone is not used.
+
+```bash
+open --env HARMONIZER_DEMO="Glass Cathedral" build/Harmonizer.app
+```
+
+The screenshot above was taken this way.
 
 ## Regenerating the icon
 

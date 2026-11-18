@@ -331,6 +331,9 @@ final class EngineModel: ObservableObject {
         var steel = slot("Poly Flex", ["Heel": 0, "Toe": 2, "Glide": 60])
         steel.hotMin[1] = 0
         steel.hotMax[1] = 1
+        var subDrop = slot("Pitch Flex", ["Heel": 0, "Toe": -24, "Glide": 80])
+        subDrop.hotMin[1] = 0
+        subDrop.hotMax[1] = 1
         return [
             p("Wide Detune", slot("Micro Shift"), slot("Plate", ["Mix": 18, "Decay": 1.2])),
             p("Twin Leads", slot("Diatonic", ["Interval A": 2, "Interval B": -3, "Mix": 55]), slot("Digital Delay", ["Mix": 25, "Time A": 380, "Time B": 380])),
@@ -398,8 +401,80 @@ final class EngineModel: ObservableObject {
             // --- ambient
             p("Ghost Swell", slot("Dyna Verb", ["Mode": 2, "Mix": 60]), slot("Reverse", ["Mix": 40])),
             p("Deep Space", slot("Rotary", ["Speed": 0]), slot("Wormhole", ["Mix": 55])),
+            // --- more delays
+            p("Quarter Note Tape", slot("Tape Echo", ["Time": 500, "Feedback": 40]), slot("Room", ["Mix": 12])),
+            p("Runaway Tape", slot("Drive Tape", ["Feedback": 95]), slot("Plate", ["Mix": 15])),
+            p("Rhythm Heads", slot("Multi Head", ["Time": 125, "Head 1": 100, "Head 2": 0, "Head 3": 80, "Head 4": 0]), slot("Spring", ["Mix": 18])),
+            p("Swell Taps", slot("Multi Tap", ["Taps": 16, "Length": 900, "Taper": -80, "Slurm": 50]), slot("Hall", ["Mix": 25])),
+            p("Reverse Lead", slot("Reverse", ["Time": 800, "Mix": 60, "Feedback": 15]), slot("Digital Delay", ["Mix": 20])),
+            p("Chorus Echo", slot("Mod Delay"), slot("Tri Chorus", ["Mix": 20])),
+            p("Bit Crushed Repeats", slot("Vintage Delay", ["Bits": 5, "Sample Rate": 3500, "Feedback": 60]), slot("Crush", ["Drive": 15, "Level": -3])),
+            p("Long Canyon", slot("Digital Delay", ["Time A": 800, "Time B": 1200, "Feedback": 55, "Hi Cut": 4000]), slot("Hall", ["Mix": 30])),
+            // --- more modulation
+            p("Classic Chorus", slot("Tri Chorus", ["Voices": 1, "Depth": 40, "Rate": 0.8]), slot("Room", ["Mix": 10])),
+            p("Liquid Phase", slot("Phaser", ["Stages": 3, "Rate": 0.2, "Feedback": 70]), slot("Plate", ["Mix": 15])),
+            p("Slow Leslie", slot("Rotary", ["Speed": 0, "Drive": 35]), slot("Spring", ["Mix": 15])),
+            p("Brownface", slot("Harmonic Trem"), slot("Spring", ["Mix": 25, "Drip": 70])),
+            p("Touch Wah", slot("Auto Wah", ["Sensitivity": 80, "Type": 0]), slot("Crush", ["Drive": 20])),
+            p("Auto Pan", slot("Tremolo Pan", ["Stereo": 180, "Rate": 1.5, "Depth": 90]), slot("Plate", ["Mix": 20])),
+            p("Machine Gun", slot("Aggro"), slot("Tremolo Pan", ["Shape": 2, "Rate": 14, "Depth": 100])),
+            p("Seasick", slot("Vibrato", ["Depth": 80, "Rate": 1.2, "Rise": 600]), slot("Bucket Delay", ["Mix": 25])),
+            p("Barber Pole", slot("Flanger", ["Feedback": -80, "Rate": 0.05, "Depth": 100]), slot("Hall", ["Mix": 20])),
+            p("Vibe Trip", slot("Uni Vibe", ["Mix": 100, "Rate": 5]), slot("Tape Echo", ["Mix": 20])),
+            // --- more reverbs
+            p("Small Club", slot("EQ Compressor"), slot("Room", ["Decay": 0.5, "Mix": 25])),
+            p("Studio Plate", slot("Plate", ["Decay": 2.5, "Pre-Delay": 40, "Mix": 35]), slot("Digital Delay", on: false)),
+            p("Drippy Surf", slot("Spring", ["Drip": 90, "Decay": 3.5, "Mix": 45]), slot("Tremolo Pan", ["Rate": 6, "Depth": 50])),
+            p("Infinite Hall", slot("Hall", ["Decay": 20, "Size": 100, "Mix": 50]), slot("Tri Chorus", ["Mix": 20])),
+            p("Shimmer Below", slot("Shimmer", ["Pitch": -12, "Shimmer": 60]), slot("Digital Delay", ["Mix": 15])),
+            p("Distorted Cave", slot("Mangled Verb", ["Overdrive": 80, "Decay": 6]), slot("EQ Compressor")),
+            p("Pulsing Tail", slot("Tremolo Verb", ["Rate": 6, "Depth": 100, "Mix": 55]), slot("Digital Delay", ["Mix": 15])),
+            p("Dream Echo", slot("Micro Shift", ["Mix": 30]), slot("Mod Echo Verb", ["Mix": 55, "Echo Fdbk": 60])),
+            // --- more pitch
+            p("Octave Down", slot("Chromatic", ["Pitch A": -12, "Pitch B": -12, "Fine B": 8, "Mix": 45]), slot("Room", ["Mix": 10])),
+            p("Bass From Guitar", slot("Octaver", ["Sub 1": 100, "Sub 2": 40, "Mix": 85]), slot("EQ Compressor", ["Low": 4])),
+            p("Power Fifths", slot("Chromatic", ["Pitch A": 7, "Pitch B": -5, "Mix": 45]), slot("Crush", ["Drive": 55, "Type": 1])),
+            p("Crystal Rain", slot("Crystals", ["Pitch A": 12, "Pitch B": 24, "Feedback": 70, "Verb Mix": 60]), slot("Shimmer", ["Mix": 30])),
+            p("Dorian Harmony", slot("Diatonic", ["Key": 2, "Scale": 2, "Interval A": 2, "Interval B": 4]), slot("Plate", ["Mix": 15])),
+            p("Sub Drop", subDrop, slot("Hall", ["Mix": 20])),
+            p("Minor Arp", slot("Arp Shift", ["Pattern": 2, "Step": 166]), slot("Mod Delay", ["Mix": 25])),
+            p("Prism Chord", slot("Prism", ["Mode": 0, "Voice 1": 4, "Voice 2": 7, "Voice 3": 12]), slot("Hall", ["Mix": 25])),
+            // --- more synth and granular
+            p("Square Lead", slot("Poly Synth", ["Wave": 1, "Voices": 2, "Cutoff": 2500, "Resonance": 3]), slot("Bucket Delay", ["Mix": 25])),
+            p("Grain Shimmer", slot("Grain Mod", ["Pitch": 12, "Mix": 45]), slot("Hall", ["Mix": 35])),
+            p("Frozen Grains", slot("Grain Cloud", ["Feedback": 80, "Size": 250, "Density": 30, "Spray": 100]), slot("Void", ["Mix": 45])),
+            p("Tape Stop", slot("Stutter", ["Pitch Step": -3, "Repeats": 6, "Cycle": 8, "Decay": 15]), slot("Drive Tape", ["Mix": 20])),
             p("Frozen Void", slot("Micro Shift", ["Mix": 40]), slot("Void", ["Mix": 60, "Gravity": 40, "Size": 100])),
         ]
+    }
+
+    // MARK: demo mode (HARMONIZER_DEMO=<preset name>): synthetic input, no audio device
+
+    private var demoTimer: DispatchSourceTimer?
+
+    func startDemo(preset name: String) {
+        if let p = presets.first(where: { $0.name == name }) { load(p) }
+        let sr = 48000.0, block = 480
+        hz_prepare(engine, sr)
+        let notes: [Double] = [82.41, 123.47, 164.81, 207.65, 246.94, 329.63]
+        var frame = 0
+        var input = [Float](repeating: 0, count: block), l = input, r = input
+        let engine = self.engine
+        let timer = DispatchSource.makeTimerSource(queue: DispatchQueue(label: "harmonizer.demo", qos: .userInteractive))
+        timer.schedule(deadline: .now(), repeating: .milliseconds(10))
+        timer.setEventHandler {
+            for i in 0..<block {
+                let t = Double(frame + i) / sr, k = Int(t / 0.35), tn = t - Double(k) * 0.35
+                let f = notes[k % notes.count]
+                var s = 0.0
+                for h in 1...6 { s += sin(2 * .pi * f * Double(h) * tn) / Double(h) * exp(-tn * (2.5 + Double(h))) }
+                input[i] = Float(0.45 * s)
+            }
+            frame += block
+            hz_process(engine, input, &l, &r, Int32(block))
+        }
+        timer.resume()
+        demoTimer = timer
     }
 
     // MARK: metering + tuner

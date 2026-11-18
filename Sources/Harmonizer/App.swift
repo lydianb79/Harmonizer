@@ -19,11 +19,17 @@ struct HarmonizerApp: App {
         let a = AudioManager(engine: engine)
         _model = StateObject(wrappedValue: m)
         _audio = StateObject(wrappedValue: a)
+        let demoPreset = ProcessInfo.processInfo.environment["HARMONIZER_DEMO"]
         AppDelegate.onQuit = {
-            m.persist()
+            if demoPreset == nil { m.persist() }  // a demo run must not overwrite the saved session
             a.stop()
         }
-        DispatchQueue.main.async { a.start() }
+        if let demo = demoPreset {
+            m.startDemo(preset: demo)  // synthetic signal, no audio device opened
+            a.markDemo()
+        } else {
+            DispatchQueue.main.async { a.start() }
+        }
     }
 
     var body: some Scene {
